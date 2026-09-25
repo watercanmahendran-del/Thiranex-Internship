@@ -1,0 +1,39 @@
+# Secure Login System
+
+A secure login web application built using Node.js and Express.
+
+## Features
+
+- User registration
+- Secure password hashing using bcrypt
+- User login authentication
+- Input validation
+- SQL injection protection using parameterized queries
+- Session management
+- Logout functionality
+- Security headers using Helmet
+- SQLite database
+
+## Technologies Used
+
+- Node.js
+- Express.js
+- SQLite
+- bcrypt
+- Express Session
+- Helmet
+- HTML
+
+## How to Run
+
+Install the required packages:
+
+npm install
+
+Start the server:
+
+node server.js
+
+Open in browser:
+
+http://localhost:3000/register.html
