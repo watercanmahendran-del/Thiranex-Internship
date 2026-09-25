@@ -1,0 +1,186 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+
+# ==========================================
+# 1. LOAD DATASET
+# ==========================================
+
+print("Loading dataset...")
+
+data = pd.read_csv("phishing_emails.csv")
+
+print("\nDataset loaded successfully!")
+print("Number of emails:", len(data))
+
+print("\nDataset:")
+print(data.head())
+
+
+# ==========================================
+# 2. PREPARE DATA
+# ==========================================
+
+X = data["text"]
+y = data["label"]
+
+
+# ==========================================
+# 3. SPLIT DATASET
+# ==========================================
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+print("\nTraining emails:", len(X_train))
+print("Testing emails:", len(X_test))
+
+
+# ==========================================
+# 4. TF-IDF FEATURE EXTRACTION
+# ==========================================
+
+print("\nExtracting text features...")
+
+vectorizer = TfidfVectorizer(
+    lowercase=True,
+    stop_words="english",
+    max_features=5000
+)
+
+X_train_tfidf = vectorizer.fit_transform(X_train)
+
+X_test_tfidf = vectorizer.transform(X_test)
+
+print("Feature extraction completed.")
+
+
+# ==========================================
+# 5. TRAIN MACHINE LEARNING MODEL
+# ==========================================
+
+print("\nTraining model...")
+
+model = LogisticRegression()
+
+model.fit(X_train_tfidf, y_train)
+
+print("Model training completed.")
+
+
+# ==========================================
+# 6. MAKE PREDICTIONS
+# ==========================================
+
+y_pred = model.predict(X_test_tfidf)
+
+
+# ==========================================
+# 7. CALCULATE ACCURACY
+# ==========================================
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("\n====================================")
+print("       MODEL PERFORMANCE")
+print("====================================")
+
+print("Accuracy:", round(accuracy * 100, 2), "%")
+
+
+# ==========================================
+# 8. CLASSIFICATION REPORT
+# ==========================================
+
+print("\nClassification Report:")
+
+print(
+    classification_report(
+        y_test,
+        y_pred
+    )
+)
+
+
+# ==========================================
+# 9. CONFUSION MATRIX
+# ==========================================
+
+cm = confusion_matrix(
+    y_test,
+    y_pred,
+    labels=["safe", "phishing"]
+)
+
+print("\nConfusion Matrix:")
+print(cm)
+
+
+# ==========================================
+# 10. DISPLAY CONFUSION MATRIX
+# ==========================================
+
+plt.figure(figsize=(6, 5))
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    xticklabels=["Safe", "Phishing"],
+    yticklabels=["Safe", "Phishing"]
+)
+
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+
+plt.title("Phishing Email Detection - Confusion Matrix")
+
+plt.tight_layout()
+
+plt.show()
+
+
+# ==========================================
+# 11. TEST NEW EMAIL
+# ==========================================
+
+print("\n====================================")
+print("       TEST A NEW EMAIL")
+print("====================================")
+
+email = input("\nEnter email text: ")
+
+email_features = vectorizer.transform([email])
+
+prediction = model.predict(email_features)[0]
+
+probability = model.predict_proba(email_features)[0].max()
+
+
+if prediction == "phishing":
+
+    print("\n⚠️ RESULT: PHISHING EMAIL")
+
+else:
+
+    print("\n✅ RESULT: SAFE EMAIL")
+
+
+print(
+    "Confidence:",
+    round(probability * 100, 2),
+    "%"
+)
